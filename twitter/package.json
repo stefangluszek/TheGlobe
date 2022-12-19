@@ -1,0 +1,26 @@
+{
+  "name": "tweets-around-the-globe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stefangluszek/TheGlobe.git"
+  },
+  "keywords": [
+    "globe",
+    "twitter"
+  ],
+  "author": "Stefan Gluszek",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/stefangluszek/TheGlobe/issues"
+  },
+  "homepage": "https://github.com/stefangluszek/TheGlobe#readme",
+  "dependencies": {
+    "needle": "^3.2.0"
+  }
+}
