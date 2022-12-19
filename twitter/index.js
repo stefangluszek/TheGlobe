@@ -130,15 +130,16 @@ function streamConnect(retryAttempt) {
     stream.on('data', data => {
         try {
             const json = JSON.parse(data);
-            if (json.data.geo.coordinates) {
-                if (json.data.geo.coordinates.type === "Point") {
-                    let coordinates = json.data.geo.coordinates.coordinates;
-                    // TODO: Aggregate tweets by coordinates.
+            if (Array.isArray(json.includes.places)) {
+                let places = json.includes.places;
+                for (let place of places) {
+                    let latitude = (place.geo.bbox[2] + place.geo.bbox[0]) / 2;
+                    let longitude = (place.geo.bbox[3] + place.geo.bbox[1]) / 2;
+                    let coordinates = [longitude, latitude];
                     coordinates.push(1);
-                    hits.queue.push(coordinates);
+                    hits.hits.push(coordinates);
                     console.log(coordinates);
                     if (Date.now() - lastWritten > storeInterval * 1000) {
-                        console.log(hits);
                         fs.writeFileSync(dataFile, JSON.stringify(hits));
                         lastWritten = Date.now();
                     }
@@ -174,6 +175,7 @@ function streamConnect(retryAttempt) {
         console.log("Stream closed.");
         console.log("Dumping the queue to file...");
         console.log("Exiting...");
+        console.log(hits);
         fs.writeFileSync(dataFile, JSON.stringify(hits));
         process.exit(1);
     });
