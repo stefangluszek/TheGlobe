@@ -5,7 +5,7 @@ const fs = require('fs');
 
 const token = process.env.BEARER_TOKEN;
 
-const queueSize = process.env.QUEUE_SIZE || 1000;
+const queueSize = process.env.QUEUE_SIZE || 10000;
 const storeInterval = (process.env.STORE_INTERVAL || 60) * 1000;
 const dataFile = process.env.DATA_FILE || "data.json";
 
@@ -97,15 +97,14 @@ async function setRules() {
 }
 
 function streamConnect(retryAttempt) {
-    let queue = [];
     let hits = {
-        hits: queue
+        hits: []
     };
     let lastWritten = 0;
 
     if (fs.existsSync(dataFile)) {
         try {
-            queue = JSON.parse(fs.readFileSync(dataFile));
+            hits = JSON.parse(fs.readFileSync(dataFile));
         } catch (e) {
             console.log("Error reading data file. Starting with empty queue.");
         }
@@ -138,14 +137,13 @@ function streamConnect(retryAttempt) {
                     let coordinates = [longitude, latitude];
                     coordinates.push(1);
                     hits.hits.push(coordinates);
-                    console.log(coordinates);
                     if (Date.now() - lastWritten > storeInterval * 1000) {
                         fs.writeFileSync(dataFile, JSON.stringify(hits));
                         lastWritten = Date.now();
                     }
                 }
-                if (queue.length > queueSize) {
-                    queue.shift();
+                if (hits.hits.length > queueSize) {
+                    hits.hits.shift();
                 }
             }
             // A successful connection resets retry count.
@@ -175,7 +173,6 @@ function streamConnect(retryAttempt) {
         console.log("Stream closed.");
         console.log("Dumping the queue to file...");
         console.log("Exiting...");
-        console.log(hits);
         fs.writeFileSync(dataFile, JSON.stringify(hits));
         process.exit(1);
     });
