@@ -98,6 +98,9 @@ async function setRules() {
 
 function streamConnect(retryAttempt) {
     let queue = [];
+    let hits = {
+        hits: queue
+    };
     let lastWritten = 0;
 
     if (fs.existsSync(dataFile)) {
@@ -132,12 +135,10 @@ function streamConnect(retryAttempt) {
                     let coordinates = json.data.geo.coordinates.coordinates;
                     // TODO: Aggregate tweets by coordinates.
                     coordinates.push(1);
-                    queue.push(coordinates);
+                    hits.queue.push(coordinates);
                     console.log(coordinates);
                     if (Date.now() - lastWritten > storeInterval * 1000) {
-                        let hits = {
-                            hits: queue
-                        };
+                        console.log(hits);
                         fs.writeFileSync(dataFile, JSON.stringify(hits));
                         lastWritten = Date.now();
                     }
@@ -173,7 +174,7 @@ function streamConnect(retryAttempt) {
         console.log("Stream closed.");
         console.log("Dumping the queue to file...");
         console.log("Exiting...");
-        fs.writeFileSync(dataFile, JSON.stringify(queue));
+        fs.writeFileSync(dataFile, JSON.stringify(hits));
         process.exit(1);
     });
 
